@@ -3,12 +3,17 @@
   "name": "Cortex Mobile Copilot",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "192x192 512x512",
-      "type": "image/x-icon"
+      "src": "/icon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
   ],
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
   "theme_color": "#0f172a",
   "background_color": "#0f172a"
