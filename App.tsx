@@ -267,7 +267,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, maxWidth: 600, width: '100%', alignSelf: 'center', backgroundColor: '#0f172a',
     backgroundColor: "#0f172a",
   },
   header: {
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   chatArea: {
-    flex: 1,
+    flex: 1, maxWidth: 600, width: '100%', alignSelf: 'center', backgroundColor: '#0f172a',
   },
   messageWrapper: {
     flexDirection: "row",
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   textInputWrapper: {
-    flex: 1,
+    flex: 1, maxWidth: 600, width: '100%', alignSelf: 'center', backgroundColor: '#0f172a',
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.05)",
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.1)",
   },
   textInput: {
-    flex: 1,
+    flex: 1, maxWidth: 600, width: '100%', alignSelf: 'center', backgroundColor: '#0f172a',
     color: "#fff",
     fontSize: 15,
     maxHeight: 100,
@@ -410,14 +410,14 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   cameraContainer: {
-    flex: 1,
+    flex: 1, maxWidth: 600, width: '100%', alignSelf: 'center', backgroundColor: '#0f172a',
     backgroundColor: "#000",
   },
   camera: {
-    flex: 1,
+    flex: 1, maxWidth: 600, width: '100%', alignSelf: 'center', backgroundColor: '#0f172a',
   },
   cameraOverlay: {
-    flex: 1,
+    flex: 1, maxWidth: 600, width: '100%', alignSelf: 'center', backgroundColor: '#0f172a',
     justifyContent: "space-between",
     backgroundColor: "rgba(0,0,0,0.3)",
   },
