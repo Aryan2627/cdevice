@@ -31,6 +31,7 @@ const COMMANDS = [
   { cmd: '/bom', desc: 'Extract Bill of Materials (BOM)' },
   { cmd: '/create-event', desc: 'Create Sourcing Event/Auction' },
   { cmd: '/generate-po', desc: 'Generate Purchase Order (PO)' },
+  { cmd: '/post-po', desc: 'Post PO to ERP & Vendor' },
 ];
 
 const LoginScreen = ({ onLogin }: { onLogin: (token: string) => void }) => {
@@ -278,7 +279,7 @@ export default function App() {
               </View>
               <View>
                 <Text style={styles.headerTitle}>{activeTab === 'chat' ? 'CORTEX' : 'PURCHASE ORDERS'}</Text>
-                <Text style={styles.headerSubtitle}>LIVE SYNC <Text style={{ color: '#00ffaa' }}>●</Text></Text>
+                <Text style={styles.headerSubtitle}>LIVE SYNC <Text style={{ color: '#00ffaa' }}>â—</Text></Text>
               </View>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
