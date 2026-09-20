@@ -32,6 +32,12 @@ const COMMANDS = [
   { cmd: '/create-event', desc: 'Create Sourcing Event/Auction' },
   { cmd: '/generate-po', desc: 'Generate Purchase Order (PO)' },
   { cmd: '/post-po', desc: 'Post PO to ERP & Vendor' },
+  { cmd: '/create-vendor', desc: 'Onboard a new vendor' },
+  { cmd: '/add-product', desc: 'Add item to product catalog' },
+  { cmd: '/approve-all', desc: 'Bulk approve all pending requests' },
+  { cmd: '/spend-report', desc: 'Generate spend analytics report' },
+  { cmd: '/analyze-bids', desc: 'Evaluate vendor proposals' },
+  { cmd: '/analyze-risk', desc: 'Generate global vendor risk profile' },
 ];
 
 const LoginScreen = ({ onLogin }: { onLogin: (token: string) => void }) => {
@@ -279,7 +285,7 @@ export default function App() {
               </View>
               <View>
                 <Text style={styles.headerTitle}>{activeTab === 'chat' ? 'CORTEX' : 'PURCHASE ORDERS'}</Text>
-                <Text style={styles.headerSubtitle}>LIVE SYNC <Text style={{ color: '#00ffaa' }}>â—</Text></Text>
+                <Text style={styles.headerSubtitle}>LIVE SYNC <Text style={{ color: '#00ffaa' }}>Ã¢â€”Â</Text></Text>
               </View>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
