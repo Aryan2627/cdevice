@@ -8,11 +8,11 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ActivityIndicator,
   Image,
-  RefreshControl,
+  StatusBar
 } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import * as Speech from "expo-speech";
@@ -24,14 +24,11 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Message = { id: string; role: "user" | "agent"; content: string; imageUri?: string; isLoading?: boolean; };
-type PO = { id: string; vendorId: string; total: string; status: string; currency: string; createdAt: string; items: any[] };
 
 const COMMANDS = [
   { cmd: '/scan', desc: 'Scan physical hardware or document' },
   { cmd: '/bom', desc: 'Extract Bill of Materials (BOM)' },
   { cmd: '/create-event', desc: 'Create Sourcing Event/Auction' },
-  { cmd: '/generate-po', desc: 'Generate Purchase Order (PO)' },
-  { cmd: '/post-po', desc: 'Post PO to ERP & Vendor' },
   { cmd: '/create-vendor', desc: 'Onboard a new vendor' },
   { cmd: '/add-product', desc: 'Add item to product catalog' },
   { cmd: '/approve-all', desc: 'Bulk approve all pending requests' },
@@ -66,35 +63,45 @@ const LoginScreen = ({ onLogin }: { onLogin: (token: string) => void }) => {
   };
 
   return (
-    <LinearGradient colors={['#020617', '#0f172a', '#1e293b']} style={{ flex: 1, justifyContent: 'center' }}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ padding: 24, maxWidth: 600, width: '100%', alignSelf: 'center' }}>
-        <View style={{ alignItems: 'center', marginBottom: 40 }}>
-          <View style={styles.glowOrb} />
-          <Sparkles color="#00c6ff" size={56} style={{ marginBottom: 16 }} />
-          <Text style={{ color: '#fff', fontSize: 32, fontWeight: '900', letterSpacing: 1 }}>CORTEX</Text>
-          <Text style={{ color: '#38bdf8', fontSize: 14, marginTop: 8, fontWeight: '600', letterSpacing: 2 }}>SECURE LOGIN</Text>
-        </View>
-        <BlurView intensity={20} tint="dark" style={{ padding: 24, borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
-          <View style={{ gap: 16 }}>
-            <TextInput placeholder="Email address" placeholderTextColor="#475569" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" style={styles.inputField} />
-            <TextInput placeholder="Password" placeholderTextColor="#475569" value={password} onChangeText={setPassword} secureTextEntry style={styles.inputField} />
-            {error ? <Text style={{ color: '#ef4444', textAlign: 'center' }}>{error}</Text> : null}
-            <TouchableOpacity onPress={handleLogin} disabled={loading}>
-              <LinearGradient colors={['#00c6ff', '#0072ff']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.loginBtn, loading && { opacity: 0.7 }]}>
-                <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>{loading ? 'Authenticating...' : 'INITIALIZE'}</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+    <LinearGradient colors={['#020617', '#0f172a', '#1e293b']} style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center' }} edges={['top', 'bottom', 'left', 'right']}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ padding: 24, maxWidth: 500, width: '100%', alignSelf: 'center' }}>
+          <View style={{ alignItems: 'center', marginBottom: 40 }}>
+            <View style={styles.glowOrb} />
+            <Sparkles color="#00c6ff" size={56} style={{ marginBottom: 16 }} />
+            <Text style={{ color: '#fff', fontSize: 32, fontWeight: '900', letterSpacing: 1 }}>CORTEX</Text>
+            <Text style={{ color: '#38bdf8', fontSize: 14, marginTop: 8, fontWeight: '600', letterSpacing: 2 }}>SECURE LOGIN</Text>
           </View>
-        </BlurView>
-      </KeyboardAvoidingView>
+          <BlurView intensity={20} tint="dark" style={{ padding: 24, borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
+            <View style={{ gap: 16 }}>
+              <TextInput placeholder="Email address" placeholderTextColor="#475569" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" style={styles.inputField} />
+              <TextInput placeholder="Password" placeholderTextColor="#475569" value={password} onChangeText={setPassword} secureTextEntry style={styles.inputField} />
+              {error ? <Text style={{ color: '#ef4444', textAlign: 'center' }}>{error}</Text> : null}
+              <TouchableOpacity onPress={handleLogin} disabled={loading}>
+                <LinearGradient colors={['#00c6ff', '#0072ff']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.loginBtn, loading && { opacity: 0.7 }]}>
+                  <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>{loading ? 'Authenticating...' : 'INITIALIZE'}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </BlurView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </LinearGradient>
   );
 };
 
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <StatusBar barStyle="light-content" backgroundColor="#020617" />
+      <MainApp />
+    </SafeAreaProvider>
+  );
+}
+
+function MainApp() {
   const [token, setToken] = useState<string | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'chat' | 'pos'>('chat');
   
   // Chat State
   const [isSpeaking, setIsSpeaking] = useState(true); 
@@ -108,13 +115,8 @@ export default function App() {
   const scrollViewRef = useRef<ScrollView>(null);
   const cameraRef = useRef<any>(null);
 
-  // PO State
-  const [pos, setPos] = useState<PO[]>([]);
-  const [isPosLoading, setIsPosLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-
   useEffect(() => {
-    if (token && isSpeaking && activeTab === 'chat') {
+    if (token && isSpeaking) {
       Speech.speak("Cortex Mobile is online.", { rate: 1.0, pitch: 1.1 });
     }
   }, [token]);
@@ -126,33 +128,11 @@ export default function App() {
     });
   }, []);
 
-  useEffect(() => {
-    if (token && activeTab === 'pos') {
-      fetchPOs();
-    }
-  }, [activeTab, token]);
-
   const handleLogout = async () => {
     await AsyncStorage.removeItem('cortex_token');
     Speech.stop();
     setToken(null);
     setMessages([{ id: "1", role: "agent", content: "Cortex Mobile is online. I am synced with your CPanel database. Type / to view commands." }]);
-  };
-
-  const fetchPOs = async () => {
-    setIsPosLoading(true);
-    try {
-      const res = await fetch('https://purchase.procgen.in/api/pos', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const data = await res.json();
-      if (Array.isArray(data)) setPos(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsPosLoading(false);
-      setRefreshing(false);
-    }
   };
 
   // --- CHAT LOGIC ---
@@ -173,7 +153,7 @@ export default function App() {
   };
 
   const speakText = (text: string) => {
-    if (isSpeaking && activeTab === 'chat') {
+    if (isSpeaking) {
       const cleanText = text.replace(/https?:\/\/[^\s]+/g, 'a link').replace(/[*#]/g, '');
       Speech.stop();
       Speech.speak(cleanText, { rate: 1.05, pitch: 1.1 });
@@ -211,7 +191,7 @@ export default function App() {
         body: JSON.stringify({ prompt: promptText, userName: 'Mobile User', history: [] })
       });
       const data = await res.json();
-      const responseText = data.reply || data.message || "Command executed successfully.";
+      const responseText = data.reply || data.message || data.final_response || "Command executed successfully.";
       
       setMessages(prev => prev.map(m => m.id === botMsgId ? { ...m, content: responseText, isLoading: false } : m));
       speakText(responseText);
@@ -244,17 +224,17 @@ export default function App() {
   if (isCameraActive) {
     if (!permission?.granted) {
       return (
-        <View style={{ flex: 1, backgroundColor: '#0f172a', alignItems: 'center', justifyContent: 'center' }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#0f172a', alignItems: 'center', justifyContent: 'center' }}>
           <Text style={{ color: '#fff', marginBottom: 20 }}>Camera permission is required.</Text>
           <TouchableOpacity onPress={requestPermission} style={{ backgroundColor: '#0072ff', padding: 16, borderRadius: 12, alignItems: 'center' }}><Text style={{ color: '#fff' }}>Grant Permission</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => setIsCameraActive(false)} style={{ marginTop: 20 }}><Text style={{ color: '#94a3b8' }}>Cancel</Text></TouchableOpacity>
-        </View>
+        </SafeAreaView>
       );
     }
     return (
       <View style={{ flex: 1, backgroundColor: '#000' }}>
         <CameraView style={{ flex: 1 }} facing="back" ref={cameraRef}>
-          <SafeAreaView style={{ flex: 1, justifyContent: "space-between" }}>
+          <SafeAreaView style={{ flex: 1, justifyContent: "space-between" }} edges={['top', 'bottom']}>
             <View style={{ padding: 20, alignItems: "flex-end" }}>
               <TouchableOpacity onPress={() => setIsCameraActive(false)} style={{ padding: 12 }}>
                 <BlurView intensity={40} tint="dark" style={{ padding: 12, borderRadius: 30, overflow: 'hidden' }}>
@@ -275,144 +255,105 @@ export default function App() {
 
   return (
     <LinearGradient colors={['#020617', '#0f172a', '#020617']} style={styles.container}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right', 'bottom']}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
           
           <BlurView intensity={50} tint="dark" style={styles.header}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <View style={styles.headerIconBg}>
-                {activeTab === 'chat' ? <Sparkles color="#00c6ff" size={20} /> : <FileText color="#00ffaa" size={20} />}
+                <Sparkles color="#00c6ff" size={20} />
               </View>
               <View>
-                <Text style={styles.headerTitle}>{activeTab === 'chat' ? 'CORTEX' : 'PURCHASE ORDERS'}</Text>
-                <Text style={styles.headerSubtitle}>LIVE SYNC <Text style={{ color: '#00ffaa' }}>Ã¢â€”Â</Text></Text>
+                <Text style={styles.headerTitle}>CORTEX</Text>
+                <Text style={styles.headerSubtitle}>LIVE SYNC <Text style={{ color: '#00ffaa' }}>●</Text></Text>
               </View>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-              {activeTab === 'chat' && (
-                <TouchableOpacity onPress={toggleVoice} style={{ padding: 8 }}>
-                  {isSpeaking ? <Volume2 color="#00c6ff" size={24} /> : <VolumeX color="#64748b" size={24} />}
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity onPress={toggleVoice} style={{ padding: 8 }}>
+                {isSpeaking ? <Volume2 color="#00c6ff" size={24} /> : <VolumeX color="#64748b" size={24} />}
+              </TouchableOpacity>
               <TouchableOpacity onPress={handleLogout} style={{ padding: 8 }}>
                 <LogOut color="#ef4444" size={22} />
               </TouchableOpacity>
             </View>
           </BlurView>
 
-          {activeTab === 'chat' ? (
-            <>
-              <ScrollView ref={scrollViewRef} style={styles.chatArea} contentContainerStyle={{ padding: 20, gap: 20 }} onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}>
-                {messages.map((msg) => (
-                  <View key={msg.id} style={{ alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
-                    {msg.role === "agent" && (
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                        <Bot color="#00c6ff" size={16} />
-                        <Text style={{ color: '#94a3b8', fontSize: 12, fontWeight: 'bold' }}>CORTEX</Text>
-                      </View>
-                    )}
-                    
-                    <LinearGradient
-                      colors={msg.role === 'user' ? ['#0072ff', '#00c6ff'] : ['rgba(30,41,59,0.8)', 'rgba(15,23,42,0.8)']}
-                      start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                      style={[styles.messageBubble, msg.role === 'user' ? styles.userBubble : styles.agentBubble]}
-                    >
-                      {msg.imageUri && (
-                        <Image source={{ uri: msg.imageUri }} style={{ width: 220, height: 220, borderRadius: 12, marginBottom: 12 }} />
-                      )}
-                      {msg.isLoading ? (
-                        <View style={styles.loadingContainer}>
-                          <ActivityIndicator color="#00c6ff" size="small" style={{ marginRight: 12 }} />
-                          <Text style={{ color: "#38bdf8", fontWeight: '500' }}>Processing request...</Text>
-                        </View>
-                      ) : (
-                        <Text style={[styles.messageText, msg.role === 'user' && { color: '#fff', fontWeight: '500' }]}>{msg.content}</Text>
-                      )}
-                    </LinearGradient>
+          <ScrollView 
+            ref={scrollViewRef} 
+            style={styles.chatArea} 
+            contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 40 }} 
+            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+            keyboardShouldPersistTaps="handled"
+          >
+            {messages.map((msg) => (
+              <View key={msg.id} style={{ alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+                {msg.role === "agent" && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <Bot color="#00c6ff" size={16} />
+                    <Text style={{ color: '#94a3b8', fontSize: 12, fontWeight: 'bold' }}>CORTEX</Text>
                   </View>
+                )}
+                
+                <LinearGradient
+                  colors={msg.role === 'user' ? ['#0072ff', '#00c6ff'] : ['rgba(30,41,59,0.8)', 'rgba(15,23,42,0.8)']}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                  style={[styles.messageBubble, msg.role === 'user' ? styles.userBubble : styles.agentBubble]}
+                >
+                  {msg.imageUri && (
+                    <Image source={{ uri: msg.imageUri }} style={{ width: 220, height: 220, borderRadius: 12, marginBottom: 12 }} />
+                  )}
+                  {msg.isLoading ? (
+                    <View style={styles.loadingContainer}>
+                      <ActivityIndicator color="#00c6ff" size="small" style={{ marginRight: 12 }} />
+                      <Text style={{ color: "#38bdf8", fontWeight: '500' }}>Processing request...</Text>
+                    </View>
+                  ) : (
+                    <Text style={[styles.messageText, msg.role === 'user' && { color: '#fff', fontWeight: '500' }]}>{msg.content}</Text>
+                  )}
+                </LinearGradient>
+              </View>
+            ))}
+          </ScrollView>
+
+          {showCommands && (
+            <BlurView intensity={90} tint="dark" style={styles.commandMenu}>
+              <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 250 }}>
+                {COMMANDS.filter(c => c.cmd.startsWith(input.toLowerCase())).map((cmd, i) => (
+                  <TouchableOpacity key={i} style={styles.commandItem} onPress={() => executeCommand(cmd.cmd)}>
+                    <View style={{ backgroundColor: 'rgba(0,198,255,0.1)', padding: 8, borderRadius: 8 }}>
+                      <Terminal color="#00c6ff" size={18} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>{cmd.cmd}</Text>
+                      <Text style={{ color: '#94a3b8', fontSize: 13 }}>{cmd.desc}</Text>
+                    </View>
+                  </TouchableOpacity>
                 ))}
               </ScrollView>
-
-              {showCommands && (
-                <BlurView intensity={70} tint="dark" style={styles.commandMenu}>
-                  {COMMANDS.filter(c => c.cmd.startsWith(input.toLowerCase())).map((cmd, i) => (
-                    <TouchableOpacity key={i} style={styles.commandItem} onPress={() => executeCommand(cmd.cmd)}>
-                      <View style={{ backgroundColor: 'rgba(0,198,255,0.1)', padding: 8, borderRadius: 8 }}>
-                        <Terminal color="#00c6ff" size={18} />
-                      </View>
-                      <View>
-                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>{cmd.cmd}</Text>
-                        <Text style={{ color: '#94a3b8', fontSize: 13 }}>{cmd.desc}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </BlurView>
-              )}
-
-              <BlurView intensity={30} tint="dark" style={styles.inputContainer}>
-                <TouchableOpacity onPress={() => pickImage()} style={styles.actionButton}>
-                  <ImageIcon color="#94a3b8" size={24} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setIsCameraActive(true)} style={styles.actionButton}>
-                  <Camera color="#00c6ff" size={24} />
-                </TouchableOpacity>
-
-                <View style={styles.textInputWrapper}>
-                  <TextInput style={styles.textInput} placeholder="Message Cortex or type /..." placeholderTextColor="#64748b" value={input} onChangeText={handleTextChange} onSubmitEditing={() => handleSend()} />
-                  <TouchableOpacity onPress={() => handleSend()} style={[styles.sendButton, !input.trim() && { backgroundColor: 'transparent' }]} disabled={!input.trim()}>
-                    <Send color={input.trim() ? "#00c6ff" : "#475569"} size={20} />
-                  </TouchableOpacity>
-                </View>
-              </BlurView>
-            </>
-          ) : (
-            <ScrollView 
-              style={{ flex: 1, padding: 16 }}
-              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchPOs(); }} tintColor="#00c6ff" />}
-            >
-              {isPosLoading && !refreshing ? (
-                <ActivityIndicator size="large" color="#00c6ff" style={{ marginTop: 40 }} />
-              ) : pos.length === 0 ? (
-                <View style={{ alignItems: 'center', marginTop: 60 }}>
-                  <FileText color="#334155" size={64} />
-                  <Text style={{ color: '#64748b', fontSize: 16, marginTop: 16 }}>No Purchase Orders found.</Text>
-                </View>
-              ) : (
-                pos.map((p) => (
-                  <TouchableOpacity key={p.id} style={styles.poCard}>
-                    <View style={styles.poCardHeader}>
-                      <Text style={styles.poCardTitle}>PO-{p.id.substring(0, 8)}</Text>
-                      <View style={[styles.statusBadge, p.status === 'DRAFT' ? {backgroundColor: 'rgba(245,158,11,0.1)'} : {backgroundColor: 'rgba(16,185,129,0.1)'}]}>
-                        {p.status === 'APPROVED' ? <CheckCircle size={14} color="#10b981" /> : <Clock size={14} color="#f59e0b" />}
-                        <Text style={[styles.statusText, {color: p.status === 'APPROVED' ? '#10b981' : '#f59e0b'}]}>{p.status}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.poCardBody}>
-                      <View>
-                        <Text style={styles.poCardLabel}>TOTAL AMOUNT</Text>
-                        <Text style={styles.poCardValue}>{p.currency || 'INR'} {parseFloat(p.total).toLocaleString()}</Text>
-                      </View>
-                      <View style={{ alignItems: 'flex-end' }}>
-                        <Text style={styles.poCardLabel}>DATE</Text>
-                        <Text style={styles.poCardValue}>{new Date(p.createdAt).toLocaleDateString()}</Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                ))
-              )}
-            </ScrollView>
+            </BlurView>
           )}
 
-          {/* Bottom Tabs */}
-          <BlurView intensity={70} tint="dark" style={styles.bottomTabs}>
-            <TouchableOpacity style={styles.tabButton} onPress={() => setActiveTab('chat')}>
-              <Bot color={activeTab === 'chat' ? '#00c6ff' : '#475569'} size={24} />
-              <Text style={[styles.tabLabel, { color: activeTab === 'chat' ? '#00c6ff' : '#475569' }]}>Cortex</Text>
+          <BlurView intensity={30} tint="dark" style={styles.inputContainer}>
+            <TouchableOpacity onPress={() => pickImage()} style={styles.actionButton}>
+              <ImageIcon color="#94a3b8" size={24} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.tabButton} onPress={() => setActiveTab('pos')}>
-              <FileText color={activeTab === 'pos' ? '#00ffaa' : '#475569'} size={24} />
-              <Text style={[styles.tabLabel, { color: activeTab === 'pos' ? '#00ffaa' : '#475569' }]}>Orders</Text>
+            <TouchableOpacity onPress={() => setIsCameraActive(true)} style={styles.actionButton}>
+              <Camera color="#00c6ff" size={24} />
             </TouchableOpacity>
+
+            <View style={styles.textInputWrapper}>
+              <TextInput 
+                style={styles.textInput} 
+                placeholder="Message Cortex or type /..." 
+                placeholderTextColor="#64748b" 
+                value={input} 
+                onChangeText={handleTextChange} 
+                onSubmitEditing={() => handleSend()} 
+              />
+              <TouchableOpacity onPress={() => handleSend()} style={[styles.sendButton, !input.trim() && { backgroundColor: 'transparent' }]} disabled={!input.trim()}>
+                <Send color={input.trim() ? "#00c6ff" : "#475569"} size={20} />
+              </TouchableOpacity>
+            </View>
           </BlurView>
 
         </KeyboardAvoidingView>
@@ -422,7 +363,7 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, maxWidth: 600, width: '100%', alignSelf: 'center' },
+  container: { flex: 1, backgroundColor: '#020617' },
   glowOrb: { position: 'absolute', top: -50, width: 150, height: 150, backgroundColor: '#00c6ff', borderRadius: 75, opacity: 0.15 },
   inputField: { backgroundColor: 'rgba(0,0,0,0.3)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 16, padding: 18, color: '#fff', fontSize: 16 },
   loginBtn: { padding: 18, borderRadius: 16, alignItems: 'center', marginTop: 12 },
@@ -430,13 +371,13 @@ const styles = StyleSheet.create({
   headerIconBg: { backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: 10, borderRadius: 12 },
   headerTitle: { color: "#fff", fontSize: 22, fontWeight: "900", letterSpacing: 1 },
   headerSubtitle: { color: "#94a3b8", fontSize: 10, fontWeight: "800", letterSpacing: 1.5 },
-  chatArea: { flex: 1 },
+  chatArea: { flex: 1, alignSelf: 'center', width: '100%', maxWidth: 600 },
   messageBubble: { padding: 18, borderRadius: 20 },
   userBubble: { borderBottomRightRadius: 4 },
   agentBubble: { borderBottomLeftRadius: 4, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
   messageText: { color: "#e2e8f0", fontSize: 16, lineHeight: 24 },
   loadingContainer: { flexDirection: "row", alignItems: "center" },
-  inputContainer: { flexDirection: "row", alignItems: "center", padding: 16, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)" },
+  inputContainer: { flexDirection: "row", alignItems: "center", padding: 16, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)", alignSelf: 'center', width: '100%', maxWidth: 600 },
   actionButton: { padding: 12, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 12, marginRight: 8 },
   textInputWrapper: { flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "rgba(0,0,0,0.4)", borderRadius: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
   textInput: { flex: 1, color: "#fff", fontSize: 16, paddingHorizontal: 20, paddingVertical: 14 },
@@ -444,17 +385,6 @@ const styles = StyleSheet.create({
   cameraControls: { paddingBottom: 50, alignItems: "center" },
   captureButton: { width: 80, height: 80, borderRadius: 40, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: '#fff' },
   captureButtonInner: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#fff" },
-  commandMenu: { position: 'absolute', bottom: 100, left: 16, right: 16, borderRadius: 24, zIndex: 10, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  commandMenu: { position: 'absolute', bottom: 100, left: 16, right: 16, borderRadius: 24, zIndex: 10, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', alignSelf: 'center', width: '100%', maxWidth: 600 },
   commandItem: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
-  bottomTabs: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', paddingVertical: 12, paddingBottom: Platform.OS === 'ios' ? 24 : 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)' },
-  tabButton: { alignItems: 'center', padding: 8 },
-  tabLabel: { fontSize: 12, fontWeight: '600', marginTop: 4 },
-  poCard: { backgroundColor: 'rgba(30,41,59,0.5)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 16, padding: 20, marginBottom: 16 },
-  poCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)', paddingBottom: 16 },
-  poCardTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  statusText: { fontSize: 12, fontWeight: 'bold' },
-  poCardBody: { flexDirection: 'row', justifyContent: 'space-between' },
-  poCardLabel: { color: '#64748b', fontSize: 10, fontWeight: 'bold', letterSpacing: 1, marginBottom: 4 },
-  poCardValue: { color: '#e2e8f0', fontSize: 16, fontWeight: '600' }
 });
