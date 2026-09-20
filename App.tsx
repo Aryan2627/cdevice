@@ -10,9 +10,9 @@ import {
   Platform,
   ActivityIndicator,
   Image,
-  StatusBar
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import * as Speech from "expo-speech";
@@ -29,6 +29,8 @@ const COMMANDS = [
   { cmd: '/scan', desc: 'Scan physical hardware or document' },
   { cmd: '/bom', desc: 'Extract Bill of Materials (BOM)' },
   { cmd: '/create-event', desc: 'Create Sourcing Event/Auction' },
+  { cmd: '/generate-po', desc: 'Generate Purchase Order (PO)' },
+  { cmd: '/post-po', desc: 'Post PO to ERP & Vendor' },
   { cmd: '/create-vendor', desc: 'Onboard a new vendor' },
   { cmd: '/add-product', desc: 'Add item to product catalog' },
   { cmd: '/approve-all', desc: 'Bulk approve all pending requests' },
@@ -64,8 +66,8 @@ const LoginScreen = ({ onLogin }: { onLogin: (token: string) => void }) => {
 
   return (
     <LinearGradient colors={['#020617', '#0f172a', '#1e293b']} style={{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1, justifyContent: 'center' }} edges={['top', 'bottom', 'left', 'right']}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ padding: 24, maxWidth: 500, width: '100%', alignSelf: 'center' }}>
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', padding: 24 }} edges={['top', 'bottom', 'left', 'right']}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ width: '100%', maxWidth: 450, alignSelf: 'center' }}>
           <View style={{ alignItems: 'center', marginBottom: 40 }}>
             <View style={styles.glowOrb} />
             <Sparkles color="#00c6ff" size={56} style={{ marginBottom: 16 }} />
@@ -93,7 +95,7 @@ const LoginScreen = ({ onLogin }: { onLogin: (token: string) => void }) => {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="light-content" backgroundColor="#020617" />
+      <StatusBar style="light" translucent backgroundColor="transparent" />
       <MainApp />
     </SafeAreaProvider>
   );
@@ -371,13 +373,13 @@ const styles = StyleSheet.create({
   headerIconBg: { backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: 10, borderRadius: 12 },
   headerTitle: { color: "#fff", fontSize: 22, fontWeight: "900", letterSpacing: 1 },
   headerSubtitle: { color: "#94a3b8", fontSize: 10, fontWeight: "800", letterSpacing: 1.5 },
-  chatArea: { flex: 1, alignSelf: 'center', width: '100%', maxWidth: 600 },
+  chatArea: { flex: 1, width: '100%' },
   messageBubble: { padding: 18, borderRadius: 20 },
   userBubble: { borderBottomRightRadius: 4 },
   agentBubble: { borderBottomLeftRadius: 4, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
   messageText: { color: "#e2e8f0", fontSize: 16, lineHeight: 24 },
   loadingContainer: { flexDirection: "row", alignItems: "center" },
-  inputContainer: { flexDirection: "row", alignItems: "center", padding: 16, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)", alignSelf: 'center', width: '100%', maxWidth: 600 },
+  inputContainer: { flexDirection: "row", alignItems: "center", padding: 16, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)", width: '100%' },
   actionButton: { padding: 12, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 12, marginRight: 8 },
   textInputWrapper: { flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "rgba(0,0,0,0.4)", borderRadius: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
   textInput: { flex: 1, color: "#fff", fontSize: 16, paddingHorizontal: 20, paddingVertical: 14 },
@@ -385,6 +387,6 @@ const styles = StyleSheet.create({
   cameraControls: { paddingBottom: 50, alignItems: "center" },
   captureButton: { width: 80, height: 80, borderRadius: 40, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: '#fff' },
   captureButtonInner: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#fff" },
-  commandMenu: { position: 'absolute', bottom: 100, left: 16, right: 16, borderRadius: 24, zIndex: 10, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', alignSelf: 'center', width: '100%', maxWidth: 600 },
+  commandMenu: { position: 'absolute', bottom: 100, left: 16, right: 16, borderRadius: 24, zIndex: 10, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   commandItem: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' },
 });
