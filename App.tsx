@@ -33,7 +33,117 @@ type Message = {
   isLoading?: boolean;
 };
 
+const LoginScreen = ({ onLogin }: { onLogin: (token?: string) => void }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    
+    try {
+      const res = await fetch('https://purchase.procgen.in/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        onLogin();
+      } else {
+        setError(data.error || 'Invalid credentials');
+      }
+    } catch (err: any) {
+      setError('Network error. Check connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    !isLoggedIn ? <LoginScreen onLogin={() => setIsLoggedIn(true)} /> : 
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', padding: 24, maxWidth: 600, width: '100%', alignSelf: 'center' }}
+    >
+      <View style={{ alignItems: 'center', marginBottom: 40 }}>
+        <Sparkles color="#00c6ff" size={48} style={{ marginBottom: 16 }} />
+        <Text style={{ color: '#fff', fontSize: 28, fontWeight: 'bold' }}>Cortex Mobile</Text>
+        <Text style={{ color: '#94a3b8', fontSize: 16, marginTop: 8 }}>Sign in with your CPanel Account</Text>
+      </View>
+
+      <View style={{ gap: 16 }}>
+        <TextInput
+          placeholder="Email address"
+          placeholderTextColor="#475569"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.05)',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderRadius: 12,
+            padding: 16,
+            color: '#fff',
+            fontSize: 16
+          }}
+        />
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#475569"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.05)',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderRadius: 12,
+            padding: 16,
+            color: '#fff',
+            fontSize: 16
+          }}
+        />
+
+        {error ? <Text style={{ color: '#ef4444', textAlign: 'center' }}>{error}</Text> : null}
+
+        <TouchableOpacity
+          onPress={handleLogin}
+          disabled={loading}
+          style={{
+            backgroundColor: '#0072ff',
+            padding: 16,
+            borderRadius: 12,
+            alignItems: 'center',
+            marginTop: 8,
+            opacity: loading ? 0.7 : 1
+          }}
+        >
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+            {loading ? 'Authenticating...' : 'Sign In'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
+  );
+};
+
+
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -126,6 +236,7 @@ export default function App() {
 
   if (isCameraActive) {
     return (
+    !isLoggedIn ? <LoginScreen onLogin={() => setIsLoggedIn(true)} /> : 
       <View style={styles.cameraContainer}>
         <CameraView style={styles.camera} ref={cameraRef} facing="back">
           <View style={styles.cameraOverlay}>
@@ -159,6 +270,7 @@ export default function App() {
   }
 
   return (
+    !isLoggedIn ? <LoginScreen onLogin={() => setIsLoggedIn(true)} /> : 
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
 
