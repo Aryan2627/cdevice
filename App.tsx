@@ -344,7 +344,7 @@ function MainApp() {
           <View style={styles.textInputWrapper}>
             <TextInput 
               style={styles.textInput} 
-              placeholder="Message Cortex or type /..." 
+              placeholder="Message Cortex..." 
               placeholderTextColor="#64748b" 
               value={input} 
               onChangeText={handleTextChange} 
@@ -377,10 +377,10 @@ const styles = StyleSheet.create({
   messageText: { color: "#e2e8f0", fontSize: 16, lineHeight: 24 },
   loadingContainer: { flexDirection: "row", alignItems: "center" },
   inputContainer: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)", width: '100%' },
-  actionButton: { padding: 12, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 12, marginRight: 8 },
-  textInputWrapper: { flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "rgba(0,0,0,0.4)", borderRadius: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
-  textInput: { flex: 1, color: "#fff", fontSize: 16, paddingHorizontal: 20, paddingVertical: 14 },
-  sendButton: { padding: 10, marginRight: 6, alignItems: "center", justifyContent: "center", borderRadius: 20 },
+  actionButton: { padding: 10, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 12, marginRight: 6 },
+  textInputWrapper: { flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "rgba(0,0,0,0.4)", borderRadius: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", flexShrink: 1 },
+  textInput: { flex: 1, color: "#fff", fontSize: 16, paddingHorizontal: 16, paddingVertical: 12, flexShrink: 1 },
+  sendButton: { padding: 8, marginRight: 4, alignItems: "center", justifyContent: "center", borderRadius: 20 },
   cameraControls: { paddingBottom: 50, alignItems: "center" },
   captureButton: { width: 80, height: 80, borderRadius: 40, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: '#fff' },
   captureButtonInner: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#fff" },
